@@ -1,0 +1,28 @@
+---
+- name: CHARGEMENT DES VARIABLES PAR DÉFAUT
+  include_vars: defaults/main.yml
+  
+- name: INSTALLATION DES PAQUETS PRÉREQUIS
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - locales
+  become: true
+  notify: RECONSTRUCTION DE LA BASE DE DONNÉES DES PARAMÈTRES RÉGIONAUX
+
+- name: DÉFINITION DES PARAMÈTRES RÉGIONAUX
+  command: localedef -i {{ locale.short }} -c -f UTF-8 -A /usr/share/locale/locale.alias {{ locale.long }}
+  become: true
+
+- name: DÉFINITION DES PARAMÈTRES RÉGIONAUX PAR DÉFAUT
+  lineinfile:
+    dest: "/etc/default/locale"
+    line: "{{ item }}"
+  with_items: 
+    - LC_ALL="fr_FR.UTF-8"
+    - LC_CTYPE="fr_FR.UTF-8"
+    - LC_MESSAGES="fr_FR.UTF-8"
+    - LANGUAGE="fr_FR.UTF-8"
+    - LANG="fr_FR.UTF-8"
+  become: true

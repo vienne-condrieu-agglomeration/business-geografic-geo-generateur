@@ -1,0 +1,32 @@
+---
+- name: CHARGEMENT DES VARIABLES PAR DÉFAUT
+  include_vars: defaults/main.yml
+
+- name: VÉRIFICATION DE L'EXISTENCE DU GROUPE UTILISATEUR DÉDIÉ
+  group:
+    name: "{{ secret.user.geo.name }}"
+    gid: "{{ secret.user.geo.gid }}"
+    state: present
+  become: true
+
+- name: CRÉATION DE L'UTILISATEUR DÉDIÉ "{{ secret.user.geo.name }}"
+  ansible.builtin.user :
+    name: "{{ secret.user.geo.name }}"
+    password: "{{ secret.user.geo.password | password_hash('sha512') }}"
+    uid: "{{ secret.user.geo.uid }}"
+    group: "{{ secret.user.geo.gid }}"
+    groups: "{{ secret.user.geo.groups }}"
+    create_home: "{{ secret.user.geo.create_home }}"
+    home: "{{ secret.user.geo.home }}"
+    shell: /bin/bash
+    system: "{{ secret.user.geo.system }}"
+    comment: "{{ secret.user.geo.comment }}"
+  become: true
+
+- name: AJOUT DE LA CLÉ SSH POUR L'UTILISATEUR
+  ansible.posix.authorized_key:
+    user: "{{ secret.user.geo.name }}"
+    state: present
+    key: "{{ secret.user.geo.ssh.pubkey }}"
+  become: true
+  notify: REDÉMARRAGE DU SERVICE SSH

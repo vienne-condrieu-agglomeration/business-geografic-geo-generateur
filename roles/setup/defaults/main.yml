@@ -1,0 +1,48 @@
+---
+#LOCALE
+locale:
+  short: "fr_FR"
+  long: "fr_FR.UTF-8"
+    
+# MOTD
+figurine:  
+  install_login_script: true
+  font: "3d.flf"
+  arch: amd64
+
+# PACKAGES
+default_packages:
+  - apt-transport-https
+  - bash-completion
+  - ca-certificates
+  - curl
+  - duf
+  - git
+  - gpg
+  - htop
+  - inxi
+  - lm-sensors
+  - lsb-release
+  - openssh-client
+  - openssh-server
+  - python3
+  - python3-psutil
+  - progress
+  - sudo
+  - tree
+  - vim
+  - wget
+
+bash_aliases:
+  - { alias: "ls", command: "ls --color=auto" }
+  - { alias: "ll", command: "ls -hl --color=auto" }
+  - { alias: "la", command: "ls -hal --color=auto" }
+  - { alias: "c", command: "clear" }
+  - { alias: "grep", command: "grep --color=auto" }
+  - { alias: "mkdir", command: "mkdir -pv" }
+  - { alias: "dcp", command: "docker compose up -d"}
+  - { alias: "dcd", command: "docker compose down"}
+  - { alias: "dtail", command: "docker logs -tf --tail='50' "} 
+  - { alias: "z", command: "zellij" }
+  - { alias: "vi", command: "vim" }
+  - { alias: "geo", command: "/opt/geo/bin/geo.sh" }

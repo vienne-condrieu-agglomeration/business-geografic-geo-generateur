@@ -1,0 +1,46 @@
+---
+- name: APACHE2 - CHARGEMENT DES VARIABLES PAR DÉFAUT
+  include_vars: defaults/main.yml
+
+- name: APACHE2 - INSTALLATION DU PAQUET apache2
+  ansible.builtin.package:
+    name: apache2
+    state: present
+  become: true
+
+- name: APACHE2 - ACTIVATION DES MODULES Apache2 REQUIS
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  with_items:
+    - deflate
+    - headers
+    - lbmethod_byrequests
+    - proxy
+    - proxy_balancer
+    - proxy_http
+    - proxy_wstunnel
+    - rewrite
+    - ssl
+  become: true
+
+- name: APACHE2 - CONFIGURATION DE LA PLATEFORME GEO
+  ansible.builtin.copy:
+    src: httpd-geo.conf
+    dest: /etc/apache2/conf-available/httpd-geo.conf
+    owner: root
+    group: root
+    mode: 0600
+  become: true
+
+- name: APACHE2 - ACTIVATION DE LA CONFIGURATION GEO
+  ansible.builtin.command:
+    cmd: a2enconf httpd-geo
+    creates: /etc/apache2/conf-enabled/httpd-geo.conf
+  become: true
+
+- name: APACHE2 - REDÉMARRAGE DU SERVICE
+  ansible.builtin.service:
+    name: apache2
+    state: restarted
+  become: true

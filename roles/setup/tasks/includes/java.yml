@@ -1,0 +1,28 @@
+---
+- name: CHARGEMENT DES VARIABLES PAR DÉFAUT
+  include_vars: defaults/main.yml
+
+- name: AJOUT DE LA CLÉ DE SIGNATURE Adoptium Eclipse Temurin AU GESTIONNAIRE DE PAQUETS apt
+  ansible.builtin.shell: "wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --dearmor | tee /etc/apt/trusted.gpg.d/adoptium.gpg > /dev/null"
+  become: true
+
+- name: AJOUT DU DÉPÔT Adoptium Eclipse Temurin
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/trusted.gpg.d/adoptium.gpg] https://packages.adoptium.net/artifactory/deb {{ ansible_distribution_release }} main"
+    state: present
+    filename: adoptium
+    update_cache: true
+  become: true
+
+- name: MISE À JOUR SYSTÈME POUR RÉCUPÉRER LES NOUVEAUX PAQUETS temurin
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: true
+    cache_valid_time: 14400
+  become: true
+
+- name: INSTALLATION DU PAQUET temurin-8-jre
+  ansible.builtin.package:
+    name: temurin-8-jre
+    state: present
+  become: true

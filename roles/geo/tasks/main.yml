@@ -1,0 +1,70 @@
+---
+- name: CHARGEMENT DES VARIABLES PAR DÉFAUT
+  include_vars: defaults/main.yml
+
+- name: CRÉATION DES RÉPERTOIRES D'INSTALLATION PAR DÉFAUT
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ secret.user.geo.name }}"
+    group: "{{ secret.user.geo.group }}"
+    mode: 0755
+    recurse: true
+  with_items: 
+    - "/home/{{ secret.user.geo.name }}/downloads/{{ geo.version }}"
+    - /opt/geo/data
+  become: true
+
+- name: COPIE DE L'INSTALLEUR GEO ET DES DIFFÉRENTS PLUGINS SUR LA VM/CONTENEUR
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/home/{{ secret.user.geo.name }}/downloads/{{ item }}"
+    owner: "{{ secret.user.geo.name }}"
+    group: "{{ secret.user.geo.group }}"
+    mode: 0755
+  with_items:
+    - "{{ geo.version }}/geo-installer-2.8.0-linux-lts.jar"
+    - "{{ geo.version }}/auto-install-geo.xml"
+    - "{{ geo.version }}/geo-intervention-plugin-2.8.0.GEO_2_6.jar"
+    # - "{{ geo.version }}/auto-install-geo-intervention.xml"
+    - "{{ geo.version }}/geocadastre-installer-5.25.2.GEO_2_6+.jar"
+    - "{{ geo.version }}/auto-install-geo-cadastre.xml"
+    - "{{ geo.version }}/solutions-backoffice-installer-2.7.4.GEO_2_6+.jar"
+    - "{{ geo.version }}/auto-install-solutions-backoffice.xml"
+    - "{{ geo.version }}/plugin-solutions-backoffice-2.7.4.GEO_2_6+.jar"
+  become: true
+
+- name: INSTALLATION DE LA PLATEFORME GEO
+  ansible.builtin.shell: java -jar geo-installer-2.8.0-linux-lts.jar auto-install-geo.xml
+  args:
+    chdir: "/home/{{ secret.user.geo.name }}/downloads/{{ geo.version }}"
+  become_user: "{{ secret.user.geo.name }}"
+  become: true
+
+- name: INSTALLATION DE LA PLATEFORME GEO - BACKOFFICE
+  ansible.builtin.shell: java -jar solutions-backoffice-installer-2.7.4.GEO_2_6+.jar auto-install-geo.xml
+  args:
+    chdir: "/home/{{ secret.user.geo.name }}/downloads/{{ geo.version }}"
+  become_user: "{{ secret.user.geo.name }}"
+  become: true
+
+- name: INSTALLATION DE LA PLATEFORME GEO - CADASTRE
+  ansible.builtin.shell: java -jar geocadastre-installer-5.25.2.GEO_2_6+.jar auto-install-geo-cadastre.xml
+  args:
+    chdir: "/home/{{ secret.user.geo.name }}/downloads/{{ geo.version }}"
+  become_user: "{{ secret.user.geo.name }}"
+  become: true
+
+- name: DÉPLOIEMENT DE LA PLATEFORME GEO
+  ansible.builtin.shell: ./geo.sh deploy
+  args:
+    chdir: /opt/geo/bin
+  become_user: "{{ secret.user.geo.name }}"
+  become: true
+
+- name: REDÉMARRAGE DE LA PLATEFORME GEO
+  ansible.builtin.shell: ./geo.sh restart
+  args:
+    chdir: /opt/geo/bin
+  become_user: "{{ secret.user.geo.name }}"
+  become: true

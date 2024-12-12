@@ -1,0 +1,73 @@
+---
+ssh:
+  port: "{{ secret.ssh.port }}"
+
+user:
+  me:
+    name: "{{ secret.user.me.name }}"
+    password: "{{ secret.user.me.password }}"
+    uid: "{{ secret.user.me.uid }}"
+    gid: "{{ secret.user.me.gid }}"
+    group: "{{ secret.user.me.group }}"
+    groups: "{{ secret.user.me.groups }}"
+    create_home: true
+    home: "{{ secret.user.me.home }}"
+    system: false
+    comment: "{{ secret.user.me.comment }}"
+    ssh:
+      pubkey: "{{ secret.user.me.ssh.pubkey }}"
+  pve:
+    ssh:
+      user: "{{ secret.user.pve.ssh.user }}"
+      pam: "{{ secret.user.pve.ssh.pam }}"
+      password: "{{ secret.user.pve.ssh.password }}"
+  lxc:
+    ssh:
+      user: "{{ secret.user.lxc.ssh.user }}"
+      password: "{{ secret.user.lxc.ssh.user }}"
+  
+proxmox:
+  pve:
+    api:
+      node: "{{ secret.proxmox.pve.api.node }}"
+      host: "{{ secret.proxmox.pve.api.host }}"
+      user: "{{ secret.proxmox.pve.api.user }}"
+      password: "{{ secret.proxmox.pve.api.password }}"
+      token_id: "{{ secret.proxmox.pve.api.token_id }}"
+      token_secret: "{{ secret.proxmox.pve.api.token_secret }}"
+  lxc:
+    name: geo
+    vmid: 182
+    cores: 4
+    cpus: "1"
+    cpuunits: "1000"
+    disk: "local-zfs:32"       # pve-storage-name:size-of-volume(GO)
+    nesting: 1
+    keyctl: 0
+    fuse: 0
+    memory: 8192
+    nameserver: 192.168.0.253
+    ip: 192.168.10.82
+    gw: 192.168.10.1
+    unprivileged: false       # true | false
+    onboot: true
+    startup: "order=99"
+    ostemplate: "iso-morpheus:vztmpl/debian-11-standard_11.7-1_amd64.tar.zst"
+    password: "{{ secret.user.lxc.ssh.password }}"
+    pubkey: "{{ secret.user.me.ssh.pubkey }}"
+    storage: "local-zfs"
+    storage_template: "iso-morpheus"
+    swap: "512"
+    tags:
+      - geo
+      - prod
+    timezone: "Europe/Paris"
+    description: |
+      <div align="center">
+      <a href="https://geo-ressources.vienne-condrieu-agglomeration.fr/"><img src="https://github.com/user-attachments/assets/bda83939-e2e2-4f17-853e-bda6538975e3" alt="Vienne Condrieu Agglomération" width="100px"></a>
+
+      # GEO Plateforme
+
+      <a href="https://www.business-geografic.com/fr/"><img src="https://github.com/user-attachments/assets/32734be9-eeae-4856-8b52-c2d54aba862e" alt="Business Geographic" width="80px"></a>
+      <a href="https://www.business-geografic.com/fr/ressources/documentation.html#geo-technologies-business-geografic-geo-generateur"><img src="https://github.com/user-attachments/assets/74108236-3788-429a-b1e1-9868f2657b13" alt="GEO Generateur" width="80px"></a>
+      </div>
