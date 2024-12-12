@@ -1,30 +1,37 @@
 ---
 - name: CHARGEMENT DES VARIABLES PAR DÉFAUT
-  include_vars: defaults/main.yml
+  include_vars: defaults/main-Debian.yml
+  when: ansible_os_family == 'Debian'
 
-- name: UTILISATEUR postgres
-  include_tasks: includes/user.yml
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
 
-- name: INSTALLATION DE PostgreSQL
-  include_tasks: includes/setup.yml
+- include_tasks: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
 
-- name: INITIALISATION DE PostgreSQL
-  include_tasks: includes/initialize.yml
+# - name: UTILISATEUR postgres
+#   include_tasks: includes/user.yml
 
-- name: CONFIGURATION DE PostgreSQL
-  include_tasks: includes/configure.yml
+# - name: INSTALLATION DE PostgreSQL
+#   include_tasks: includes/setup.yml
 
-- name: RÔLE(S) DE PostgreSQL
-  include_tasks: includes/roles.yml
+# - name: INITIALISATION DE PostgreSQL
+#   include_tasks: includes/initialize.yml
 
-- name: CRÉATION DES MODÈLES DE BASES DE DONNÉES PostgreSQL
-  include_tasks: includes/templates.yml
+# - name: CONFIGURATION DE PostgreSQL
+#   include_tasks: includes/configure.yml
 
-- name: AJOUT DES EXTENSIONS PostgreSQL
-  include_tasks: includes/extensions.yml
+# - name: RÔLE(S) DE PostgreSQL
+#   include_tasks: includes/roles.yml
 
-- name: CRÉATION DES BASES DE DONNÉES PostgreSQL
-  include_tasks: includes/databases.yml
+# - name: CRÉATION DES MODÈLES DE BASES DE DONNÉES PostgreSQL
+#   include_tasks: includes/templates.yml
+
+# - name: AJOUT DES EXTENSIONS PostgreSQL
+#   include_tasks: includes/extensions.yml
+
+# - name: CRÉATION DES BASES DE DONNÉES PostgreSQL
+#   include_tasks: includes/databases.yml
 
 # - name: PGTune PostgreSQL
 #   include_tasks: includes/pgtune.yml

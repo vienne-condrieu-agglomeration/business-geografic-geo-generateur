@@ -1,0 +1,19 @@
+---
+- name: INSTALLATION DU DEPOT postgresql DE LA COMMUNAUTE
+  ansible.builtin.dnf:
+    name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-$(rpm -E %rhel)-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+    state: present
+
+- name: INSTALLATION DU DEPOT postgresql DE LA COMMUNAUTE
+  ansible.builtin.dnf:
+    name: "postgresql{{ postgresql_version }}-server"
+    state: present
+
+- name: INSTALLATION DES PAQUETS PostgreSQL
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ postgresql.packages }}"
+  become: true
+
+    dnf install postgresql$PGVER-server

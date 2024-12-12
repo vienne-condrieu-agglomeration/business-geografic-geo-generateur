@@ -1,5 +1,4 @@
 ---
-# defaults file for roles/postgresql
 postgresql_version: 15
 
 postgresql:
