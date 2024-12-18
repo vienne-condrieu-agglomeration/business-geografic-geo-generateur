@@ -12,13 +12,28 @@
   vars_files:
     - vars/vault.yml
   pre_tasks:
-  - name: MISE À JOUR SYSTÈME
+  - name: MISE À JOUR SYSTÈME (Debian)
     become: true
     apt:
       update_cache: true
       upgrade: true
       cache_valid_time: 14400
+    when: ansible_os_family == 'Debian'
+  - name: MISE À JOUR SYSTÈME (RHEL Base)
+    become: true
+    apt:
+      update_cache: true
+      upgrade: true
+      cache_valid_time: 14400
+    when: ansible_os_family == 'RedHat'
   roles:
     - role: setup
     - role: postgresql
     - role: geo
+
+- hosts: geo
+  tags: postgresql
+  vars_files:
+    - vars/vault.yml
+  roles:
+    - role: postgresql
