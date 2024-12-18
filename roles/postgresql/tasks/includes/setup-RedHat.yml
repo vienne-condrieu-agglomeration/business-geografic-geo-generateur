@@ -1,19 +1,109 @@
 ---
-- name: INSTALLATION DU DEPOT postgresql DE LA COMMUNAUTE
+- name: INSTALLATION DES LIBRAIRIES PYTHON REQUISES
   ansible.builtin.dnf:
-    name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-$(rpm -E %rhel)-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+    name: "{{ item }}"
     state: present
+  with_items: "{{ postgresql.python.library}}"
+  become: true
 
-- name: INSTALLATION DU DEPOT postgresql DE LA COMMUNAUTE
+- name: INSTALLATION DU DÉPÔT Extra Packages for Enterprise Linux (EPEL)
   ansible.builtin.dnf:
-    name: "postgresql{{ postgresql_version }}-server"
+    name: epel-release
     state: present
+  become: true
+
+- name: ACTIVATION DU DÉPÔT CRB
+  community.general.dnf_config_manager:
+    name: crb
+    state: enabled
+  become: true
+
+- name: INSTALLATION DU PAQUET langpacks-fr POUR LES PARAMÈTRES RÉGIONAUX
+  ansible.builtin.dnf:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - langpacks-fr
+    - glibc-langpack-fr
+  become: true
+
+- name: CONFIGURATION DES PARAMÈTRES RÉGIONAUX DU SYSTÈME
+  ansible.builtin.command:
+    cmd: "localectl set-locale {{ item }}"
+  with_items: "{{ postgresql.locales }}"
+  changed_when: false
+  become: true
+
+- name: TÉLÉCHARGEMENT DU PAQUET D'INSTALLATION DU DÉPÔT postgresql DE LA COMMUNAUTÉ
+  ansible.builtin.get_url:
+    url: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-{{ rhel_platform_id }}-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+    dest: /tmp/pgdg-redhat-repo-latest.noarch.rpm
+    validate_certs: no
+
+- name: INSTALLATION DU DÉPOT postgresql DE LA COMMUNAUTÉ
+  ansible.builtin.shell: dnf install -y /tmp/pgdg-redhat-repo-latest.noarch.rpm
+  become: true
+
+- name: DÉSACTIVACTION DU MODULE PostgreSQL INTÉGRÉ
+  ansible.builtin.shell: dnf -qy module disable postgresql
+  become: true
+
+- name: DÉSACTIVATION DES DIFFÉRENTS DÉPÔTS DE VERSIONS DE postgresql
+  community.general.dnf_config_manager:
+    name: "{{ item }}"
+    state: disabled
+  with_items:
+    - pgdg12
+    - pgdg13
+    - pgdg14
+    - pgdg15
+    - pgdg16
+    - pgdg17
+  become: true
+
+- name: ACTIVATION DU DÉPÔT DE LA VERSION DE postgresql SOUHAITÉE
+  community.general.dnf_config_manager:
+    name: "pgdg{{ postgresql_version }}"
+    state: enabled
+  become: true
+
+- name: MISE À JOUR SYSTÈME (RHEL Base)
+  ansible.builtin.shell: dnf -y update
+  become: true
 
 - name: INSTALLATION DES PAQUETS PostgreSQL
-  package:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   with_items: "{{ postgresql.packages }}"
   become: true
 
-    dnf install postgresql$PGVER-server
+- name: ON S'ASSURE QUE LA BASE DE DONNÉES A ÉTÉ INITIALISÉ
+  ansible.builtin.stat:
+    path: "{{ postgresql.directories.datadir }}/postgresql.conf"
+  register: pgsql_cluster
+  become: true
+
+- name: INITIALISATION DU MOTEUR DE BASE DE DONNÉES
+  ansible.builtin.shell: "/usr/pgsql-{{ postgresql_version }}/bin/postgresql-{{ postgresql_version }}-setup initdb"
+  when: not pgsql_cluster.stat.exists
+  become: true
+
+- name: ACTIVATION ET DÉMARRAGE DU SERVICE postgresql
+  ansible.builtin.systemd_service:
+    name: postgresql-{{ postgresql_version }}.service
+    state: started
+    enabled: true
+  become: true
+
+- name: AUTORISATION DANS LE PARE-FEU DU PROTOCOLE postgresql
+  ansible.posix.firewalld:
+    permanent: true
+    zone: public
+    service: postgresql
+    state: enabled
+  become: true
+
+- name: REDÉMARRAGE DU PARE-FEU
+  ansible.builtin.shell: firewall-cmd --reload
+  become: true

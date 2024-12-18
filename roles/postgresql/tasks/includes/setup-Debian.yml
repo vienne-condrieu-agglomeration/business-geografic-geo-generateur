@@ -1,5 +1,19 @@
 ---
 # tasks file for roles/postgresql/includes/install.yml
+- name: MISE À JOUR SYSTÈME (Debian)  
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: true
+    cache_valid_time: 14400
+  become: true
+
+- name: INSTALLATION DES LIBRAIRIES PYTHON REQUISES
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ postgresql.python.library}}"
+  become: true
+
 - name: ON S'ASSURE QUE LE RÉPERTOIRE DE DÉPÔT DES CLÉS EXISTE
   ansible.builtin.file:
     path: /etc/apt/keyrings
@@ -31,13 +45,6 @@
   register: locale_gen_result
   become: true
 
-- name: INSTALLATION DES LIBRAIRIES PYTHON REQUISES
-  apt:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ postgresql.python.library}}"
-  become: true
-
 - name: INSTALLATION DES PAQUETS PostgreSQL
   package:
     name: "{{ item }}"
@@ -49,5 +56,4 @@
   service:
     name: postgresql
     state: restarted
-  when: locale_gen_result.changed
   become: true

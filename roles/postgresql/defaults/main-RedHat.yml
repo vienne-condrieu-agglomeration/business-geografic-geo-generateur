@@ -1,5 +1,7 @@
 ---
+rhel_platform_id: 9
 postgresql_version: 15
+postgis_version: 35
 
 postgresql:
   apt:
@@ -9,30 +11,42 @@ postgresql:
       dest: /etc/apt/keyrings/pgdg.asc
 
   packages:
-    - "postgresql-{{ postgresql_version }}"
-    - "postgresql-client-{{ postgresql_version }}"
-    - "postgresql-contrib-{{ postgresql_version }}"
-    - "postgresql-server-dev-{{ postgresql_version }}"
-    - "postgresql-{{ postgresql_version }}-postgis-3"
-    - "postgresql-{{ postgresql_version }}-pgrouting"
-    - "postgresql-doc-{{ postgresql_version }}"
-    - libpq-dev
+    - "postgresql{{ postgresql_version }}"
+    - "postgresql{{ postgresql_version }}-contrib"
+    - "postgresql{{ postgresql_version }}-devel"
+    - "postgresql{{ postgresql_version }}-docs"
+    - "postgresql{{ postgresql_version }}-libs"
+    # - "postgresql{{ postgresql_version }}-odbc"
+    # - "postgresql{{ postgresql_version }}-plperl"
+    - "postgresql{{ postgresql_version }}-plpython3"
+    # - "postgresql{{ postgresql_version }}-pltcl"
+    - "postgresql{{ postgresql_version }}-server"
+    # - "postgresql{{ postgresql_version }}-tcl"
+    # - "postgresql{{ postgresql_version }}-test"
+    - "postgis{{ postgis_version }}_{{ postgresql_version }}"
+    - "postgis{{ postgis_version }}_{{ postgresql_version }}-client"
+    - "postgis{{ postgis_version }}_{{ postgresql_version }}-devel"
+    - "postgis{{ postgis_version }}_{{ postgresql_version }}-docs"
+    # - "postgis{{ postgis_version }}_{{ postgresql_version }}-gui"
+    - "postgis{{ postgis_version }}_{{ postgresql_version }}-utils"
+    - "pgrouting_{{ postgresql_version }}"
+
+  daemon: postgresql-{{ postgresql_version }}.service
 
   user: 
     name: postgres
-    uid: 996
+    uid: 26
     group: postgres
-    gid: 996
+    gid: 26
     comment: "Administrateur PostgreSQL"
 
   directories:
-    home: /var/lib/postgresql
-    datadir: "/var/lib/postgresql/{{ postgresql_version }}/main"
-    bin: "/usr/lib/postgresql/{{ postgresql_version }}/bin"
-    lib: "/usr/lib/postgresql/{{ postgresql_version }}/lib"
-    config: "/etc/postgresql/{{ postgresql_version }}/main"
-    log: /var/log/postgresql
-    man: "/usr/share/postgresql/{{ postgresql_version }}/man"
+    home: /var/lib/pgsql/{{ postgresql_version }}
+    datadir: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    bin: "/usr/pgsql-{{ postgresql_version }}/bin"
+    lib: "/usr/pgsql-{{ postgresql_version }}/lib"
+    config: "/var/lib/pgsql/{{ postgresql_version }}/data"
+    log: "/var/lib/pgsql/{{ postgresql_version }}/log"
 
   locales:
     - "fr_FR.UTF-8"
@@ -113,7 +127,6 @@ postgresql:
     - name: plpython3u
       db: _template_postgis_v3.5.0
       schema: pg_catalog
-
     - name: plpgsql
       db: _template
       schema: pg_catalog
@@ -154,8 +167,9 @@ postgresql:
     entries:
       - {type: host, database: all, user: "{{ secret.user.geo.name }}", address: '192.168.10.0/24', auth_method: 'scram-sha-256'}
       - {type: host, database: all, user: "{{ secret.user.geo.name }}", address: '192.168.20.0/24', auth_method: 'scram-sha-256'}
+      - {type: host, database: all, user: "{{ secret.user.geo.name }}", address: '10.10.22.64/26', auth_method: 'scram-sha-256'}
 
   python:
     library: 
+      - "python3-firewall"
       - "python3-psycopg2"
-      - "postgresql-plpython3-{{ postgresql_version }}"

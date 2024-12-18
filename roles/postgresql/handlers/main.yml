@@ -2,24 +2,24 @@
 # handlers file for roles/postgresql
 - name: start postgresql
   service:
-    name: postgresql
+    name: "{{ postgresql.daemon }}"
     state: started
   become: true
 
 - name: restart postgresql
   service:
-    name: postgresql
+    name: "{{ postgresql.daemon }}"
     state: restarted
   become: true
 
 - name: reload postgresql
   service:
-    name: postgresql
+    name: "{{ postgresql.daemon }}"
     state: reloaded
   become: true
 
 - name: stop postgresql
   service:
-    name: postgresql
+    name: "{{ postgresql.daemon }}"
     state: stopped
   become: true

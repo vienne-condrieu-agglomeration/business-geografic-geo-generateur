@@ -1,5 +1,6 @@
 ---
 postgresql_version: 15
+postgis_version: 3
 
 postgresql:
   apt:
@@ -13,10 +14,13 @@ postgresql:
     - "postgresql-client-{{ postgresql_version }}"
     - "postgresql-contrib-{{ postgresql_version }}"
     - "postgresql-server-dev-{{ postgresql_version }}"
-    - "postgresql-{{ postgresql_version }}-postgis-3"
+    - "postgresql-plpython3-{{ postgresql_version }}"
+    - "postgresql-{{ postgresql_version }}-postgis-{{ postgis_version }}"
     - "postgresql-{{ postgresql_version }}-pgrouting"
     - "postgresql-doc-{{ postgresql_version }}"
     - libpq-dev
+
+  daemon: postgresql.service  
 
   user: 
     name: postgres
@@ -113,7 +117,6 @@ postgresql:
     - name: plpython3u
       db: _template_postgis_v3.5.0
       schema: pg_catalog
-
     - name: plpgsql
       db: _template
       schema: pg_catalog

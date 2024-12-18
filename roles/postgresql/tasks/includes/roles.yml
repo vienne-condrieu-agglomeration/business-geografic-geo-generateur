@@ -23,3 +23,4 @@
     ansible_ssh_pipelining: true
   environment:
     PGOPTIONS: "{{ (postgresql.auth.method == 'scram-sha-256') | ternary('-c password_encryption=scram-sha-256', '') }}"
+  notify: restart postgresql

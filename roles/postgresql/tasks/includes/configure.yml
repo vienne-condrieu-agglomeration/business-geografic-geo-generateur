@@ -26,13 +26,7 @@
     dest: "{{ postgresql.directories.config }}/pg_hba.conf"
     owner: "{{ postgresql.user.name }}"
     group: "{{ postgresql.user.group }}"
-    mode: 0600
-  notify: restart postgresql
+    mode: 0600  
   when: postgresql.hba.entries | length > 0
   become: true
-
-- name: "REDÉMARRAGE DE PostgreSQL"
-  service:
-    name: postgresql
-    state: restarted
-  become: true
+  notify: restart postgresql
