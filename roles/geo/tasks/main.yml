@@ -35,7 +35,7 @@
   become: true
 
 - name: INSTALLATION DE LA PLATEFORME GEO
-  ansible.builtin.shell: java -jar geo-installer-2.8.0-linux-lts.jar auto-install-geo.xml
+  ansible.builtin.shell: java -jar geo-installer-{{ geo.version }}-linux-lts.jar auto-install-geo.xml
   args:
     chdir: "/home/{{ secret.user.geo.name }}/downloads/{{ geo.version }}"
   become_user: "{{ secret.user.geo.name }}"

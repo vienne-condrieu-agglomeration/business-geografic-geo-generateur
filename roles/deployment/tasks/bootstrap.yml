@@ -3,9 +3,15 @@
   ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "groupadd -f -g {{ secret.user.me.gid }} {{ secret.user.me.name }}"
   delegate_to: "{{ proxmox.pve.api.host }}"
 
-- name: AMORÇAGE - AJOUT DE L'UTILISATEUR PRINCIPAL
+- name: AMORÇAGE - AJOUT DE L'UTILISATEUR PRINCIPAL (Debian)
   ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "id -u {{ secret.user.me.name }} &>/dev/null || useradd --create-home --shell /bin/bash --uid {{ secret.user.me.uid }} --gid {{ secret.user.me.gid }} --groups sudo --comment '{{ secret.user.me.comment }}' {{ secret.user.me.name }}"
   delegate_to: "{{ proxmox.pve.api.host }}"
+  when: ansible.os_family == "Debian"
+
+- name: AMORÇAGE - AJOUT DE L'UTILISATEUR PRINCIPAL (RHEL Base)
+  ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "id -u {{ secret.user.me.name }} &>/dev/null || useradd --create-home --shell /bin/bash --uid {{ secret.user.me.uid }} --gid {{ secret.user.me.gid }} --groups wheel --comment '{{ secret.user.me.comment }}' {{ secret.user.me.name }}"
+  delegate_to: "{{ proxmox.pve.api.host }}"
+  when: ansible.os_family == "RedHat"
 
 - name: AMORÇAGE - AJOUT DU MOT DE PASSE DE L'UTILISATEUR PRINCIPAL
   ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "printf '{{ secret.user.me.password }}\n{{ secret.user.me.password }}\n' | passwd {{ secret.user.me.name }}"
@@ -54,9 +60,15 @@
   ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "chown -Rf {{ secret.user.me.uid }}:{{ secret.user.me.gid }} /home/{{ secret.user.me.name }}/.ssh"
   delegate_to: "{{ proxmox.pve.api.host }}"
 
-- name: AMORÇAGE - INSTALLATION DE sudo
+- name: AMORÇAGE - INSTALLATION DE sudo (Debian)
   ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "apt install sudo"
   delegate_to: "{{ proxmox.pve.api.host }}"
+  when: ansible.os_family == "Debian"
+
+- name: AMORÇAGE - INSTALLATION DE sudo (RedHat Base)
+  ansible.builtin.command: lxc-attach "{{ proxmox.lxc.vmid }}" -- /bin/bash -c "dnf install sudo"
+  delegate_to: "{{ proxmox.pve.api.host }}"
+  when: ansible.os_family == "RedHat"
 
 - name: AMORÇAGE - COPIE DU FICHIER sudoers POUR L'UTILISATEUR PRINCIPAL
   template:

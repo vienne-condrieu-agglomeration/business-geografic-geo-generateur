@@ -1,4 +1,7 @@
 ---
+ansible:
+  os_family: RedHat
+
 ssh:
   port: "{{ secret.ssh.port }}"
 
@@ -37,27 +40,27 @@ proxmox:
       token_secret: "{{ secret.proxmox.pve.api.token_secret }}"
   lxc:
     name: geo
-    vmid: 182
+    vmid: 100
     cores: 4
     cpus: "1"
     cpuunits: "1000"
-    disk: "local-zfs:32"       # pve-storage-name:size-of-volume(GO)
+    disk: "local-lvm:32"       # pve-storage-name:size-of-volume(GO)
     nesting: 1
     keyctl: 0
     fuse: 0
     memory: 8192
-    nameserver: 192.168.0.253
-    ip: 192.168.10.82
-    gw: 192.168.10.1
+    nameserver: 10.0.2.3
+    ip: 10.0.2.100
+    gw: 10.0.2.2
     unprivileged: false       # true | false
     onboot: true
-    startup: "order=99"
-    ostemplate: "iso-morpheus:vztmpl/debian-11-standard_11.7-1_amd64.tar.zst"
+    startup: "order=1"
+    ostemplate: "local:vztmpl/rockylinux-9-default_20240912_amd64.tar.xz"
     password: "{{ secret.user.lxc.ssh.password }}"
     pubkey: "{{ secret.user.me.ssh.pubkey }}"
-    storage: "local-zfs"
-    storage_template: "iso-morpheus"
-    swap: "512"
+    storage: "local-lvm"
+    storage_template: "local"
+    swap: "1024"
     tags:
       - geo
       - prod
