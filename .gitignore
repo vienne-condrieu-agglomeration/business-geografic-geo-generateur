@@ -1,0 +1,7 @@
+.vault-password
+galaxy/*
+authorized_keys
+*.pub
+*.lock
+*.pdf
+*.jar
